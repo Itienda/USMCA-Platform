@@ -1,0 +1,13 @@
+# PRODENSA · USMCA Intelligence — despliegue con cabeceras de seguridad
+[build]
+  publish = "."
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "no-referrer"
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains"
+    Permissions-Policy = "geolocation=(), microphone=(), camera=()"
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' https://unpkg.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://unpkg.com https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src https: data: blob:; connect-src 'self' https://*.supabase.co https://api.frankfurter.dev https://nominatim.openstreetmap.org https://api.frankfurter.app; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
