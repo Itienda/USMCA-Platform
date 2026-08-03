@@ -61,8 +61,21 @@ Deno.serve(async (req) => {
   if (!TOKEN || !PHONE_ID) {
     return Response.json({ error: "WhatsApp Cloud API sin configurar (WHATSAPP_TOKEN / WHATSAPP_PHONE_ID). Ver doc 13. No se simulan envíos." }, { status: 503 });
   }
-  const db = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+  const SRK = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+  const db = createClient(Deno.env.get("SUPABASE_URL")!, SRK);
+  /* SEGURIDAD (revisión full-stack 31-jul-2026): antes CUALQUIER usuario
+     autenticado podía invocar esta función y gastar mensajes de pago hacia
+     destinatarios arbitrarios. Ahora exige service_role (cron/pipeline) o admin,
+     y acota el tamaño de la llamada. */
+  const auth = (req.headers.get("Authorization") ?? "").replace("Bearer ", "");
+  if (auth !== SRK) {
+    const { data: u } = await db.auth.getUser(auth);
+    if (!u?.user) return Response.json({ error: "no autorizado" }, { status: 401 });
+    const { data: p } = await db.from("profiles").select("role").eq("id", u.user.id).maybeSingle();
+    if (p?.role !== "admin") return Response.json({ error: "solo un administrador puede disparar alertas" }, { status: 403 });
+  }
   const { edition_date, items = [], recipients = [], test = false } = await req.json();
+  if (recipients.length > 200 || items.length > 50) return Response.json({ error: "limite excedido (200 destinatarios / 50 items)" }, { status: 400 });
   if (!edition_date || !items.length || !recipients.length) {
     return Response.json({ error: "payload incompleto: edition_date, items[], recipients[]" }, { status: 400 });
   }

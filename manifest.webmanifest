@@ -1,0 +1,15 @@
+{
+  "name": "PRODENSA · USMCA Intelligence",
+  "short_name": "USMCA",
+  "description": "Inteligencia ejecutiva del entorno operativo México–EE. UU. para directivos.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0A2540",
+  "theme_color": "#0A2540",
+  "lang": "es",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
